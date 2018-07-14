@@ -12,6 +12,7 @@ public class Perlin {
 
 	//set to 0 to get infinite perlin noise
 	private int repeat = 0;
+	private double scale;
 	
 	
 	private Integer[] p = { 151,160,137,91,90,15,                 // Hash lookup table as defined by Ken Perlin.  This is a randomly
@@ -32,18 +33,20 @@ public class Perlin {
 	
 	
 	
-	public Perlin(long seed){ 
+	public Perlin(long seed, double scale){ 
 		List<Integer> l = Arrays.asList(p);
 		Collections.shuffle(l, new Random(seed));
 		p = (Integer[]) l.toArray();
+		this.scale=scale;
+	}
+	
+	public Perlin(double scale){
+		this(new Random().nextLong(), scale);
 	}
 	
 	public Perlin(){
-		List<Integer> l = Arrays.asList(p);
-		Collections.shuffle(l, new Random((long)(Math.random()*9223372036854775807L*2-9223372036854775807L)));
-		p = (Integer[]) l.toArray();
+		this(1);
 	}
-	
 	
 	
 	public double OctavePerlin(double x, double y, int octaves, float persistence, float lacunarity) {
@@ -52,7 +55,7 @@ public class Perlin {
 	    double amplitude = 1;
 	    double maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
 	    for(int i=0;i<octaves;i++) {
-	        total += perlin(x * frequency, y * frequency) * amplitude;
+	        total += perlin(x * frequency / scale, y * frequency / scale) * amplitude;
 	        
 	        maxValue += amplitude;
 	        
@@ -119,7 +122,7 @@ public class Perlin {
 	
 	public double grad(int hash, double relX, double relY)
 	{
-	    switch(hash%3)	//changed - real perlin algorithm:  switch(hash & 0xF)
+	    switch(hash%4)	//changed - real perlin algorithm:  switch(hash & 0xF)
 	    {
 	        case 0: return  relX + relY;
 	        case 1: return -relX + relY;
